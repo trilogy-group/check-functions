@@ -9,10 +9,19 @@ from utils.logger import get_logger
 
 
 logger = get_logger(__name__)
+openai_errors = (
+    openai.error.Timeout,
+    openai.error.APIError,
+    openai.error.APIConnectionError,
+    openai.error.InvalidRequestError,
+    openai.error.AuthenticationError,
+    openai.error.PermissionError,
+    openai.error.RateLimitError,
+)
 def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to run conciseness check on {event=}")
     try:
-        body = LLMToolkitStdCheckInputSchema(**event)
+        input_data = LLMToolkitStdCheckInputSchema(**event)
     except ValidationError  as ve:
         response = ErrorSchema(
             message="Bad Request Body",
@@ -21,15 +30,15 @@ def lambda_handler(event: dict, context: dict) -> dict:
         return {"statusCode": 400, "body": response.model_dump()}
     
     user_prompt, system_prompt = compare_answers_prompt(
-            question=body.question,
-            old_answer = body.old_answer,
-            new_answer=body.new_answer,
+            question=input_data.question,
+            old_answer = input_data.old_answer,
+            new_answer=input_data.new_answer,
             criterion="How concise the answer is"
         )
 
     try:
         secrets = get_secret()
-    except Exception as e:
+    except openai_errors as e:
         logger.error(f"Failed to retrieve secrets: {e}")
         response = ErrorSchema(
             message="Internal Server Error",
@@ -51,7 +60,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
         )
         
         check_result: str = response['choices'][0]['message']['content']
-    except Exception as e:
+    except openai as e:
         logger.error(f"Failed to make call to openai: {e}")
         response = ErrorSchema(
             message="Internal Server Error",
@@ -62,13 +71,13 @@ def lambda_handler(event: dict, context: dict) -> dict:
     try:
         check_dictionary = json.loads(check_result)
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = check_dictionary
         )
     except json.decoder.JSONDecodeError as e:
         logger.error(f"Failed while trying to parse response {check_result}: {e}")
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = {
                 "conciseness": "Error while computing check"
             }
@@ -76,7 +85,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
     except ValidationError as e:
         logger.error(f"Failed while trying to set output to {check_dictionary=}")
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = {
                 "conciseness": "Error while computing check"
             }

@@ -9,11 +9,20 @@ from utils.logger import get_logger
 
 
 logger = get_logger(__name__)
+openai_errors = (
+    openai.error.Timeout,
+    openai.error.APIError,
+    openai.error.APIConnectionError,
+    openai.error.InvalidRequestError,
+    openai.error.AuthenticationError,
+    openai.error.PermissionError,
+    openai.error.RateLimitError,
+)
 def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to check if old answer is non committal for {event=}")
 
     try:
-        body = LLMToolkitStdCheckInputSchema(**event)
+        input_data = LLMToolkitStdCheckInputSchema(**event)
     except ValidationError  as ve:
         response = ErrorSchema(
             message="Bad Request Body",
@@ -22,13 +31,13 @@ def lambda_handler(event: dict, context: dict) -> dict:
         return {"statusCode": 400, "body": response.model_dump()}
     
     user_prompt, system_prompt = detect_noncommittal_response(
-        question=body.question,
-        answer = body.old_answer
+        question=input_data.question,
+        answer = input_data.old_answer
     )
 
     try:
         secrets = get_secret()
-    except Exception as e:
+    except openai_errors as e:
         logger.error(f"Failed to retrieve secrets: {e}")
         response = ErrorSchema(
             message="Internal Server Error",
@@ -61,13 +70,13 @@ def lambda_handler(event: dict, context: dict) -> dict:
     try:
         check_dictionary = json.loads(check_result)
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = check_dictionary
         )
     except json.decoder.JSONDecodeError as e:
         logger.error(f"Failed while trying to parse response {check_result}: {e}")
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = {
                 "non-committal": "Error while computing check"
             }
@@ -75,7 +84,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
     except ValidationError as e:
         logger.error(f"Failed while trying to set output to {check_dictionary=}")
         response = LLMToolkitStdCheckOutputSchema(
-            id = body.id,
+            id = input_data.id,
             result = {
                 "non-committal": "Error while computing check"
             }

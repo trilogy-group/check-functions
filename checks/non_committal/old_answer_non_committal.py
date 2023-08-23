@@ -3,7 +3,7 @@ import json
 import openai
 
 from utils.check_schema import LLMToolkitStdCheckInputSchema, LLMToolkitStdCheckOutputSchema, ErrorSchema
-from prompt import detect_noncommital_response
+from prompt import detect_noncommittal_response
 from utils.secret_manager import get_secret
 from utils.logger import get_logger
 
@@ -13,7 +13,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to check if old answer is non committal for {event=}")
     try:
         body = LLMToolkitStdCheckInputSchema(**event)
-        user_prompt, system_prompt = detect_noncommital_response(
+        user_prompt, system_prompt = detect_noncommittal_response(
             question=body.question,
             answer = body.old_answer
         )

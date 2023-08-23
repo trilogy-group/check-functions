@@ -1,0 +1,15 @@
+# This configuration runs each prompt through a series of example inputs and checks if they meet requirements.
+
+prompts: [prompts.txt]
+providers: [openai:gpt-3.5-turbo-0613]
+tests:
+  - description: Conciseness check
+    vars:
+      criterion: how concise the answer is
+      question: 1+1?
+      old_answer: 1+1 is 2.
+      new_answer: 2.
+    assert:
+      - type: is-json
+      - type: javascript
+        value: "Object.keys(JSON.parse(output)).includes('conciseness')"

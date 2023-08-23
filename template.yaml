@@ -13,7 +13,7 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
   Function:
     Timeout: 600
     MemorySize: 256
-    Runtime: python3.11
+    Runtime: python3.9
 
 Resources:
   SecretReaderRole:

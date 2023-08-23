@@ -2,8 +2,8 @@ from pydantic import ValidationError
 import json
 import openai
 
-from utils.schema import InputSchema, OutputSchema, ErrorSchema
-from prompt import detect_noncommital_response
+from utils.check_schema import LLMToolkitStdCheckInputSchema, LLMToolkitStdCheckOutputSchema, ErrorSchema
+from prompt import detect_noncommittal_response
 from utils.secret_manager import get_secret
 from utils.logger import get_logger
 
@@ -12,8 +12,8 @@ logger = get_logger(__name__)
 def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to check if new answer is non committal for {event=}")
     try:
-        body = InputSchema(**event)
-        user_prompt, system_prompt = detect_noncommital_response(
+        body = LLMToolkitStdCheckInputSchema(**event)
+        user_prompt, system_prompt = detect_noncommittal_response(
             question=body.question,
             answer = body.new_answer
         )
@@ -34,13 +34,13 @@ def lambda_handler(event: dict, context: dict) -> dict:
 
         try:
             check_dictionary = json.loads(check_result)
-            response = OutputSchema(
+            response = LLMToolkitStdCheckOutputSchema(
                 id = body.id,
                 result = check_dictionary
             )
         except Exception as e:
             logger.error(f"Failed while trying to parse response {check_result}: {e}")
-            response = OutputSchema(
+            response = LLMToolkitStdCheckOutputSchema(
                 id = body.id,
                 result = {
                     "non-committal": "Error while computing check"

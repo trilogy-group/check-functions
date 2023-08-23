@@ -5,11 +5,9 @@ providers: [openai:gpt-3.5-turbo-0613]
 tests:
   - description: Conciseness check
     vars:
-      criterion: how concise the answer is
-      question: 1+1?
-      var2: 1+1 is 2.
-      var3: 2.
+      question: Tell me something.
+      answer: I don't know
     assert:
       - type: is-json
       - type: javascript
-        value: "Object.keys(JSON.parse(output)).includes('conciseness')"
+        value: "Object.keys(JSON.parse(output)).includes('non-committal')"

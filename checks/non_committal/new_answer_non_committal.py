@@ -1,8 +1,3 @@
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools import Tracer
-from aws_lambda_powertools import Metrics
 from pydantic import ValidationError
 import json
 import openai
@@ -10,16 +5,11 @@ import openai
 from utils.schema import InputSchema, OutputSchema, ErrorSchema
 from prompt import detect_noncommital_response
 from utils.secret_manager import get_secret
-
-tracer = Tracer()
-logger = Logger()
-metrics = Metrics(namespace="Powertools")
+from utils.logger import get_logger
 
 
-# Enrich logging with contextual information from Lambda
-@logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
-@tracer.capture_lambda_handler
-def lambda_handler(event: dict, context: LambdaContext) -> dict:
+logger = get_logger(__name__)
+def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to check if new answer is non committal for {event=}")
     try:
         body = InputSchema(**event)

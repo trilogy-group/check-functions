@@ -1,3 +1,4 @@
+from typing import List
 def compare_answers_prompt(question: str, old_answer: str, new_answer: str, criterion: str, labels: List[str] = ["more", "less", "unchanged"]):
 
     system_prompt = f"""You are an AI assistant that compares two different answers to the same question. 

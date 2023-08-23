@@ -15,6 +15,7 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
     MemorySize: 256
     Runtime: python3.9
 
+# TODO: Use parameter store instead
 Resources:
   SecretReaderRole:
     Type: AWS::IAM::Role

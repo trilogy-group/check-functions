@@ -50,6 +50,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
         openai_api_key = secrets["OPENAI_API_KEY"]
         openai.api_key = openai_api_key
         openai_model = 'gpt-3.5-turbo'
+        # TODO: Use function calling to guarantee json output
         response = openai.ChatCompletion.create(
             model=openai_model,
             messages=[

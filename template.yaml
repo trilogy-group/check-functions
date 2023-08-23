@@ -3,8 +3,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   checks
 
-  Powertools example
-
 
 Parameters:
   SecretsName:
@@ -15,8 +13,9 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
   Function:
     Timeout: 600
     MemorySize: 256
-    Runtime: python3.11
+    Runtime: python3.9
 
+# TODO: Use parameter store instead
 Resources:
   SecretReaderRole:
     Type: AWS::IAM::Role
@@ -45,19 +44,15 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: conciseness.lambda_handler
-      CodeUri: checks
+      CodeUri: checks/conciseness
       Description: Conciseness Checker
       Architectures:
         - x86_64
       Tracing: Active
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-          POWERTOOLS_METRICS_NAMESPACE: Powertools
           LOG_LEVEL: INFO
           SECRET_NAME: !Ref SecretsName
-      Tags:
-        LambdaPowertools: python
       Role:
         Fn::GetAtt:
         - SecretReaderRole
@@ -67,19 +62,15 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: old_answer_non_committal.lambda_handler
-      CodeUri: checks
+      CodeUri: checks/non_committal
       Description: Old Answer Non Committal Checker
       Architectures:
         - x86_64
       Tracing: Active
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-          POWERTOOLS_METRICS_NAMESPACE: Powertools
           LOG_LEVEL: INFO
           SECRET_NAME: !Ref SecretsName
-      Tags:
-        LambdaPowertools: python
       Role:
         Fn::GetAtt:
         - SecretReaderRole
@@ -89,20 +80,15 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
     Properties:
       Handler: new_answer_non_committal.lambda_handler
-      CodeUri: checks
+      CodeUri: checks/non_committal
       Description: New Answer Non Committal Checker
       Architectures:
         - x86_64
       Tracing: Active
-       # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
       Environment:
         Variables:
-          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-          POWERTOOLS_METRICS_NAMESPACE: Powertools
           LOG_LEVEL: INFO
           SECRET_NAME: !Ref SecretsName
-      Tags:
-        LambdaPowertools: python
       Role:
         Fn::GetAtt:
         - SecretReaderRole

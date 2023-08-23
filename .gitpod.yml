@@ -2,9 +2,9 @@
 tasks:
   - name: Python Setup
     command: |
-      pyenv install 3.10.5
-      pyenv local 3.10.5
-      export PYENV_VERSION=3.10.5
+      pyenv install 3.9.12
+      pyenv local 3.9.12
+      export PYENV_VERSION=3.9.12
       gp sync-done python
   - name: SAM Setup
     command: |

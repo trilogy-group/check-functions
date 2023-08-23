@@ -14,3 +14,6 @@ keys/symmetric_keyfile.key
 
 # SAM
 .aws-sam
+
+# Pycache
+**/__pycache__/

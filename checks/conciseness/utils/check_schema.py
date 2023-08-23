@@ -1,17 +1,17 @@
-from typing import Dict, Optional
+from typing import Dict, Union
 from pydantic import BaseModel
 
 
-class InputSchema(BaseModel):
+class LLMToolkitStdCheckInputSchema(BaseModel):
     id: str
     question: str
     new_answer: str
     old_answer: str
 
 
-class OutputSchema(BaseModel):
+class LLMToolkitStdCheckOutputSchema(BaseModel):
     id: str
-    result: Dict[str, str | int | float | bool]
+    result: Dict[str, Union[str, int, float, bool]]
 
 class ErrorSchema(BaseModel):
     message: str

@@ -5,7 +5,7 @@ import os
 from functools import lru_cache
 
 import boto3
-from aws_lambda_powertools import Logger
+from utils.logger import get_logger
 
 class SecretManagerClient:
     def __init__(
@@ -18,7 +18,7 @@ class SecretManagerClient:
                                                   aws_secret_access_key=secret_key,
                                                   aws_session_token=session_token
                                                   )
-        self.logger = Logger()
+        self.logger = get_logger(__name__)
 
     def get_secret_value(self, secret_name: str) -> Dict[str, str]:
         try:

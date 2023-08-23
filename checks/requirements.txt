@@ -1,4 +1,0 @@
-requests
-aws-lambda-powertools[tracer]
-pydantic
-openai

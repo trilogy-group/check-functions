@@ -1,3 +1,8 @@
+usage() {
+    echo "Usage: $0 --update_secrets <true | false>"
+    exit 1
+}
+
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -8,6 +13,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown argument: $key"
+            usage
     esac
 done
 
@@ -22,5 +28,5 @@ if [[ "$update_secrets" == "true" ]]; then
 fi
 
 
-sam.exe build --parameter-overrides SecretsName=$SecretsName
-sam.exe deploy --guided --parameter-overrides SecretsName=$SecretsName
+sam build --parameter-overrides SecretsName=$SecretsName
+sam deploy --guided --parameter-overrides SecretsName=$SecretsName

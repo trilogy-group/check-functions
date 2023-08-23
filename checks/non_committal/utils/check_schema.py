@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from pydantic import BaseModel
 
 
@@ -11,7 +11,7 @@ class LLMToolkitStdCheckInputSchema(BaseModel):
 
 class LLMToolkitStdCheckOutputSchema(BaseModel):
     id: str
-    result: Dict[str, str | int | float | bool]
+    result: Dict[str, Union[str, int, float, bool]]
 
 class ErrorSchema(BaseModel):
     message: str

@@ -5,11 +5,10 @@ from aws_lambda_powertools import Tracer
 from aws_lambda_powertools import Metrics
 from pydantic import ValidationError
 import json
+import openai
 
 from utils.schema import InputSchema, OutputSchema, ErrorSchema
-from utils.prompts import detect_noncommital_response
-from utils.chat_completion import get_chat_completion
-from utils.sample_qa import SAMPLE_QUESTION, SAMPLE_NEW_ANSWER, SAMPLE_OLD_ANSWER
+from prompt import compare_answers_prompt
 from utils.secret_manager import get_secret
 
 tracer = Tracer()
@@ -21,16 +20,31 @@ metrics = Metrics(namespace="Powertools")
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
-    logger.info(f"Going to check if old answer is non committal for {event=}")
+    logger.info(f"Going to run conciseness check on {event=}")
     try:
         body = InputSchema(**event)
-        user_prompt, system_prompt = detect_noncommital_response(
+        user_prompt, system_prompt = compare_answers_prompt(
             question=body.question,
-            answer = body.old_answer
+            old_answer = body.old_answer,
+            new_answer=body.new_answer,
+            criterion="How concise the answer is"
         )
+
         secrets = get_secret()
         openai_api_key = secrets["OPENAI_API_KEY"]
-        check_result: str = get_chat_completion(system_prompt=system_prompt, user_prompt=user_prompt, api_key=openai_api_key)
+        openai.api_key = openai_api_key
+        openai_model = 'gpt-3.5-turbo'
+        response = openai.ChatCompletion.create(
+            model=openai_model,
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt}
+            ],
+            temperature=0,
+        )
+        
+        check_result: str = response['choices'][0]['message']['content']
+
         try:
             check_dictionary = json.loads(check_result)
             response = OutputSchema(
@@ -42,7 +56,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
             response = OutputSchema(
                 id = body.id,
                 result = {
-                    "non-committal": "Error while computing check"
+                    "conciseness": "Error while computing check"
                 }
             )
         return {"statusCode": 200, "body": response.model_dump()}
@@ -59,11 +73,14 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
         )
         return {"statusCode": 500, "body": response.model_dump()}
 
-if __name__ == "__main__":
-    event = {
-        "id": "123",
-        "question": SAMPLE_QUESTION,
-        "old_answer": SAMPLE_OLD_ANSWER,
-        "new_answer": SAMPLE_NEW_ANSWER
-    }
-    print(lambda_handler(event=event, context={}))
+def get_chat_completion(system_prompt: str, user_prompt: str, api_key: str, model: str = 'gpt-3.5-turbo'):
+    openai.api_key=api_key
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=[
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ],
+        temperature=0,
+    )
+    return response['choices'][0]['message']['content']

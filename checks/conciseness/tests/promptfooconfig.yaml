@@ -5,7 +5,6 @@ providers: [openai:gpt-3.5-turbo-0613]
 tests:
   - description: Conciseness check
     vars:
-      criterion: how concise the answer is
       question: 1+1?
       old_answer: 1+1 is 2.
       new_answer: 2.

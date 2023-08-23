@@ -32,8 +32,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
     user_prompt, system_prompt = compare_answers_prompt(
             question=input_data.question,
             old_answer = input_data.old_answer,
-            new_answer=input_data.new_answer,
-            criterion="How concise the answer is"
+            new_answer=input_data.new_answer
         )
 
     try:

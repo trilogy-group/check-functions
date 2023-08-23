@@ -1,6 +1,6 @@
 [{
     "role": "system",
-    "content": "You are an AI assistant that compares two different answers to the same question. You are to compare the second answer against the first on the following criterion: {{criterion}}. For each criteria, classify the content in second answer as compared to the first answer, with one of the following labels: more, less, unchanged. Your answer should be a JSON object with the criterion as the key and the label as the value."
+    "content": "You are an AI assistant that compares two different answers to the same question. You are to compare the second answer against the first on the following criterion: how concise the answer is. Classify the content in second answer as compared to the first answer, with one of the following labels: more, less, unchanged. Your answer should be a JSON object with conciseness as the key and the label as the value."
 },
 {
     "role": "user",
@@ -9,7 +9,7 @@
 ---
 [{
     "role": "system",
-    "content": "You are an AI assistant that compares two different answers to the same question. You are to compare the second answer against the first on the following criterion: {{criterion}}. For each criteria, classify the content in second answer as compared to the first answer, with one of the following labels: more, less, unchanged. Your answer should be a JSON object with the criterion as the key and the label as the value, and another key-value for the reason."
+    "content": "You are an AI assistant that compares two different answers to the same question. You are to compare the second answer against the first on the following criterion: how concise the answer is. Classify the content in second answer as compared to the first answer, with one of the following labels: more, less, unchanged. Your answer should be a JSON object with conciseness as the key and the label as the value, and another key-value for the reason."
 },
 {
     "role": "user",

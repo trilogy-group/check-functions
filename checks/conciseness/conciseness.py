@@ -2,7 +2,7 @@ from pydantic import ValidationError
 import json
 import openai
 
-from utils.schema import InputSchema, OutputSchema, ErrorSchema
+from utils.check_schema import LLMToolkitStdCheckInputSchema, LLMToolkitStdCheckOutputSchema, ErrorSchema
 from prompt import compare_answers_prompt
 from utils.secret_manager import get_secret
 from utils.logger import get_logger
@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 def lambda_handler(event: dict, context: dict) -> dict:
     logger.info(f"Going to run conciseness check on {event=}")
     try:
-        body = InputSchema(**event)
+        body = LLMToolkitStdCheckInputSchema(**event)
         user_prompt, system_prompt = compare_answers_prompt(
             question=body.question,
             old_answer = body.old_answer,
@@ -37,13 +37,13 @@ def lambda_handler(event: dict, context: dict) -> dict:
 
         try:
             check_dictionary = json.loads(check_result)
-            response = OutputSchema(
+            response = LLMToolkitStdCheckOutputSchema(
                 id = body.id,
                 result = check_dictionary
             )
         except Exception as e:
             logger.error(f"Failed while trying to parse response {check_result}: {e}")
-            response = OutputSchema(
+            response = LLMToolkitStdCheckOutputSchema(
                 id = body.id,
                 result = {
                     "conciseness": "Error while computing check"

@@ -1,0 +1,20 @@
+# List the start up tasks. You can start them in parallel in multiple terminals. See https://www.gitpod.io/docs/config-start-tasks/
+tasks:
+  - name: Python Setup
+    command: |
+      pyenv install 3.10.5
+      pyenv local 3.10.5
+      export PYENV_VERSION=3.10.5
+      gp sync-done python
+  - name: SAM Setup
+    command: |
+      gp sync-await python
+      pip install --upgrade aws-sam-cli
+      gp sync-done sam
+  - name: Setup Project
+    init: |
+      gp sync-await sam
+      pip install -r setup/requirements.txt
+      python setup/git_hooks.py
+      python setup/dev.py
+      bash scripts/init.sh

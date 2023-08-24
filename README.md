@@ -8,3 +8,14 @@ It is recommended to use Devspaces for development with this template as it uses
 3. Enter the RSA key in Devspaces terminal and then hit enter twice.
 4. Fill the values corresponding to the [required environment variables](env/.env.dev.template).
 5. Your application will now be up and running. 
+
+## Testing
+The prompts can be tested using promptfoo. These instructions for running these tests can be found under `/checks/{check_name}/tests/README.md`
+
+## Deploying
+To deploy the check functions,
+1. Make sure you have logged in with `saml2aws`.
+2. Run `export AWS_DEFAULT_REGION={name-of-region}`.
+3. Set the name of the secrets to be used over [here](scripts/deploy.sh#L24)
+<!-- Ideally, this name will be generated using the name of the project and service when creating a template. -->
+4. Run `bash scripts/deploy.sh --update_secrets <true/false>`. The update_secrets parameter should be set to `true` if deploying for the first time, or if the values in the `.env` have been updated.

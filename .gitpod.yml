@@ -40,9 +40,9 @@ tasks:
   - name: Setup Project
     init: |
       gp sync-await sam
-      pip install -r setup/requirements.txt
-      python setup/git_hooks.py
-      python setup/dev.py
+      # pip install -r setup/requirements.txt
+      # python setup/git_hooks.py
+      # python setup/dev.py
       bash scripts/init.sh
   - name: Install Promptfoo
     init: |

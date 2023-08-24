@@ -45,19 +45,9 @@ def lambda_handler(event: dict, context: dict) -> dict:
         return {"statusCode": 500, "body": response.model_dump()}
 
     try:
-        openai_api_key = secrets["OPENAI_API_KEY"]
-        openai.api_key = openai_api_key
-        openai_model = 'gpt-3.5-turbo'
-        response = openai.ChatCompletion.create(
-            model=openai_model,
-            messages=[
-                {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': user_prompt}
-            ],
-            temperature=0,
-        )
-        
-        check_result: str = response['choices'][0]['message']['content']
+        openai_api_key: str = secrets["OPENAI_API_KEY"]
+        openai_model: str = 'gpt-3.5-turbo'
+        check_result = make_llm_call(openai_api_key, openai_model, user_prompt=user_prompt, system_prompt=system_prompt)
     except openai_errors as e:
         logger.error(f"Failed to make call to openai: {e}")
         response = ErrorSchema(
@@ -89,3 +79,15 @@ def lambda_handler(event: dict, context: dict) -> dict:
             }
         )
     return {"statusCode": 200, "body": response.model_dump()}
+
+def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str, temperature: int = 0)->str:
+    openai.api_key = openai_api_key
+    response = openai.ChatCompletion.create(
+        model=openai_model,
+        messages=[
+            {'role': 'system', 'content': system_prompt},
+            {'role': 'user', 'content': user_prompt}
+        ],
+        temperature=0,
+    )
+    return response['choices'][0]['message']['content']

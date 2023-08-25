@@ -1,28 +1,37 @@
 import unittest
+from unittest.mock import patch, Mock
 import sys
 import os
 import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import conciseness
-from prompt import compare_answers_prompt
 
-class TestConciseness(unittest.TestCase):
-    
-    def test_make_llm_call_returns_json_string(self) -> None:
-        question = "What is 1+1?"
-        old_answer = "1+1 is 2."
-        new_answer = "2."
-        openai_api_key: str = os.environ['OPENAI_API_KEY']
-        openai_model: str = 'gpt-3.5-turbo'
-        user_prompt, system_prompt = compare_answers_prompt(question, old_answer, new_answer)
-        result = conciseness.make_llm_call(openai_api_key, openai_model, user_prompt, system_prompt)
-        try:
-            json_data = json.loads(result)
-            self.assertIsInstance(json_data, dict)
-        except json.JSONDecodeError:
-            self.fail("LLM output is not valid json.")
+class TestYourLambdaScript(unittest.TestCase):
 
+    @patch('conciseness.get_secret')
+    @patch('conciseness.make_llm_call')
+    def test_conciseness_check(self, mock_make_llm_call, mock_get_secret):
+        mock_get_secret.return_value = {
+            "OPENAI_API_KEY": "mocked_api_key"
+        }
+        
+        mock_make_llm_call.return_value = '{"conciseness": "less"}'
+        
+        event = {
+            "id": "123",
+            "question": "What is the meaning of life?",
+            "old_answer": "42",
+            "new_answer": "The meaning of life is 42."
+        }
 
-if __name__ == "__main__":
+        context = {}
+
+        response = conciseness.lambda_handler(event, context)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertTrue('result' in response['body'])
+        self.assertEqual(type(response['body']['result']), dict)
+
+if __name__ == '__main__':
     unittest.main()

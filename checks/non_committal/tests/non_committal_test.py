@@ -1,27 +1,37 @@
 import unittest
+from unittest.mock import patch, Mock
 import sys
 import os
 import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import new_answer_non_committal
-from prompt import detect_noncommittal_response
+import old_answer_non_committal
 
-class TestConciseness(unittest.TestCase):
-    
-    def test_make_llm_call_returns_json_string(self) -> None:
-        question = "Tell me something"
-        answer = "I don't know."
-        openai_api_key: str = os.environ['OPENAI_API_KEY']
-        openai_model: str = 'gpt-3.5-turbo'
-        user_prompt, system_prompt = detect_noncommittal_response(question, answer)
-        result = new_answer_non_committal.make_llm_call(openai_api_key, openai_model, user_prompt, system_prompt)
-        try:
-            json_data = json.loads(result)
-            self.assertIsInstance(json_data, dict)
-        except json.JSONDecodeError:
-            self.fail("LLM output is not valid json.")
+class TestYourLambdaScript(unittest.TestCase):
 
+    @patch('old_answer_non_committal.get_secret')
+    @patch('old_answer_non_committal.make_llm_call')
+    def test_non_committal_check(self, mock_make_llm_call, mock_get_secret):
+        mock_get_secret.return_value = {
+            "OPENAI_API_KEY": "mocked_api_key"
+        }
+        
+        mock_make_llm_call.return_value = '{"non_committal": "true"}'
+        
+        event = {
+            "id": "123",
+            "question": "What is the meaning of life?",
+            "old_answer": "42",
+            "new_answer": "The meaning of life is 42."
+        }
 
-if __name__ == "__main__":
+        context = {}
+
+        response = old_answer_non_committal.lambda_handler(event, context)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertTrue('result' in response['body'])
+        self.assertEqual(type(response['body']['result']), dict)
+
+if __name__ == '__main__':
     unittest.main()

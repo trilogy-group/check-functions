@@ -50,3 +50,9 @@ tasks:
       nvm use v18.16.0
       npm install -g npm
       npm install -g promptfoo
+vscode:
+  extensions:
+    - amazonwebservices.aws-toolkit-vscode
+    - GitHub.copilot
+    - ms-python.python
+    - GitHub.copilot-labs

@@ -11,6 +11,7 @@ from typing import Dict, Union
 logger = get_logger(__name__)
 openai_errors = ( Timeout, APIError, APIConnectionError, InvalidRequestError, AuthenticationError, PermissionError, RateLimitError )
 
+# TODO: we should move these into a different repo, probably llm-toolkit-api, and import them here
 class LLMToolkitStdCheckInputSchema(BaseModel):
     id: str
     question: str

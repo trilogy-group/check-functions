@@ -34,7 +34,8 @@ class OutputSchema(BaseModel):
 
 def lambda_handler(event: dict, context: dict) -> OutputSchema:
     '''
-    This function accesses the conciseness of the new answer compared to the old answer. It conforms to the LLM Toolkit Standard Check API defined here: SAHIL ADD THE URL HERE
+    This function assesses the conciseness of the new answer compared to the old answer. It conforms to the LLM Toolkit Standard Check API defined here: https://github.com/trilogy-group/llm_toolkit_api/blob/3fe8805e210554b616c47a60216addb01ea14cff/runtime/chalicelib/schema/evaluation.py#L138
+    TODO: Replace the above link to a readme once merged
     '''
 
     logger.info(f"Going to run conciseness check on {event=}")

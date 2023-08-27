@@ -107,4 +107,4 @@ def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, syst
         ],
         temperature=0,
     )
-    return response['choices'][0]['message']['content']
+    return response['choices'][0]['message']['content'] # type: ignore

@@ -26,9 +26,13 @@ class LLMToolkitStdCheckOutputSchema(BaseModel):
 class ErrorSchema(BaseModel):
     message: str
     reason: str
+    
+class OutputSchema(BaseModel):
+    statusCode: int
+    body: Union[LLMToolkitStdCheckOutputSchema, ErrorSchema]
 
 
-def lambda_handler(event: dict, context: dict) -> dict:
+def lambda_handler(event: dict, context: dict) -> OutputSchema:
     '''
     This function accesses the conciseness of the new answer compared to the old answer. It conforms to the LLM Toolkit Standard Check API defined here: SAHIL ADD THE URL HERE
     '''
@@ -41,14 +45,8 @@ def lambda_handler(event: dict, context: dict) -> dict:
             message="Bad Request Body",
             reason=str(ve),
         )
-        return {"statusCode": 400, "body": response.model_dump()}
+        return OutputSchema(statusCode=400, body=response)
     
-    user_prompt, system_prompt = compare_answers_prompt(
-            question=input_data.question,
-            old_answer = input_data.old_answer,
-            new_answer=input_data.new_answer
-        )
-
     try:
         secrets = get_secret()
     except Exception as e:
@@ -57,10 +55,17 @@ def lambda_handler(event: dict, context: dict) -> dict:
             message="Internal Server Error",
             reason=str(e),
         )
-        return {"statusCode": 500, "body": response.model_dump()}
+        return OutputSchema(statusCode=500, body=response)
+    
+    return do(secrets["OPENAI_API_KEY"], input_data)
 
+def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSchema:
+    user_prompt, system_prompt = compare_answers_prompt(
+            question=input_data.question,
+            old_answer = input_data.old_answer,
+            new_answer=input_data.new_answer
+        )
     try:
-        openai_api_key: str = secrets["OPENAI_API_KEY"]
         openai_model: str = 'gpt-3.5-turbo'
         check_result = make_llm_call(openai_api_key, openai_model, user_prompt=user_prompt, system_prompt=system_prompt)
     except openai_errors as e:
@@ -69,7 +74,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
             message="Internal Server Error",
             reason=str(e),
         )
-        return {"statusCode": 500, "body": response.model_dump()}
+        return OutputSchema(statusCode=500, body=response)
 
     try:
         check_dictionary = json.loads(check_result)
@@ -93,7 +98,7 @@ def lambda_handler(event: dict, context: dict) -> dict:
                 "conciseness": "Error while computing check"
             }
         )
-    return {"statusCode": 200, "body": response.model_dump()}
+    return OutputSchema(statusCode=200, body=response)
 
 def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str, temperature: int = 0)->str:
     openai.api_key = openai_api_key

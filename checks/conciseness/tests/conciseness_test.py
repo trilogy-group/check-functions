@@ -29,9 +29,10 @@ class TestYourLambdaScript(unittest.TestCase):
 
         response = conciseness.lambda_handler(event, context)
 
-        self.assertEqual(response['statusCode'], 200)
-        self.assertTrue('result' in response['body'])
-        self.assertEqual(type(response['body']['result']), dict)
+        self.assertEqual(response.statusCode, 200)
+        self.assertIsInstance(response.body, conciseness.LLMToolkitStdCheckOutputSchema)
+        if isinstance(response.body, conciseness.LLMToolkitStdCheckOutputSchema):
+            self.assertEqual(response.body.result, {"conciseness": "less"})
 
 if __name__ == '__main__':
     unittest.main()

@@ -26,7 +26,7 @@ class LLMToolkitStdCheckOutputSchema(BaseModel):
 class ErrorSchema(BaseModel):
     message: str
     reason: str
-    
+
 class OutputSchema(BaseModel):
     statusCode: int
     body: Union[LLMToolkitStdCheckOutputSchema, ErrorSchema]
@@ -78,27 +78,24 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSc
 
     try:
         check_dictionary = json.loads(check_result)
-        response = LLMToolkitStdCheckOutputSchema(
-            id = input_data.id,
-            result = check_dictionary
-        )
     except json.decoder.JSONDecodeError as e:
         logger.error(f"Failed while trying to parse response {check_result}: {e}")
-        response = LLMToolkitStdCheckOutputSchema(
+        return OutputSchema(statusCode=500, body=ErrorSchema(
+            message="Check result not valid json",
+            reason=str(e),
+        ))
+    
+    try:
+        return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
             id = input_data.id,
-            result = {
-                "conciseness": "Error while computing check"
-            }
-        )
+            result = check_dictionary
+        ))
     except ValidationError as e:
         logger.error(f"Failed while trying to set output to {check_dictionary=}")
-        response = LLMToolkitStdCheckOutputSchema(
-            id = input_data.id,
-            result = {
-                "conciseness": "Error while computing check"
-            }
-        )
-    return OutputSchema(statusCode=200, body=response)
+        return OutputSchema(statusCode=500, body=ErrorSchema(
+            message="Check result not valid schema",
+            reason=str(e),
+        ))
 
 def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str, temperature: int = 0)->str:
     openai.api_key = openai_api_key

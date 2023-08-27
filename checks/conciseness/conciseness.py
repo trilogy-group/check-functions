@@ -1,24 +1,37 @@
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel
 import json
 import openai
+from openai.error import Timeout, APIError, APIConnectionError, InvalidRequestError, AuthenticationError, PermissionError, RateLimitError
 
-from utils.check_schema import LLMToolkitStdCheckInputSchema, LLMToolkitStdCheckOutputSchema, ErrorSchema
 from prompt import compare_answers_prompt
 from utils.secret_manager import get_secret
 from utils.logger import get_logger
-
+from typing import Dict, Union
 
 logger = get_logger(__name__)
-openai_errors = (
-    openai.error.Timeout,
-    openai.error.APIError,
-    openai.error.APIConnectionError,
-    openai.error.InvalidRequestError,
-    openai.error.AuthenticationError,
-    openai.error.PermissionError,
-    openai.error.RateLimitError,
-)
+openai_errors = ( Timeout, APIError, APIConnectionError, InvalidRequestError, AuthenticationError, PermissionError, RateLimitError )
+
+class LLMToolkitStdCheckInputSchema(BaseModel):
+    id: str
+    question: str
+    new_answer: str
+    old_answer: str
+
+
+class LLMToolkitStdCheckOutputSchema(BaseModel):
+    id: str
+    result: Dict[str, Union[str, int, float, bool]]
+
+class ErrorSchema(BaseModel):
+    message: str
+    reason: str
+
+
 def lambda_handler(event: dict, context: dict) -> dict:
+    '''
+    This function accesses the conciseness of the new answer compared to the old answer. It conforms to the LLM Toolkit Standard Check API defined here: SAHIL ADD THE URL HERE
+    '''
+
     logger.info(f"Going to run conciseness check on {event=}")
     try:
         input_data = LLMToolkitStdCheckInputSchema(**event)

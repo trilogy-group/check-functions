@@ -29,5 +29,21 @@ class TestYourLambdaScript(unittest.TestCase):
         if isinstance(response.body, conciseness.LLMToolkitStdCheckOutputSchema):
             self.assertEqual(response.body.result, {"conciseness": "less"})
 
+    @patch('conciseness.make_llm_call')
+    def test_non_json_output(self, mock_make_llm_call):
+        mock_make_llm_call.return_value = 'The answer is less concise.'
+        
+        event = conciseness.LLMToolkitStdCheckInputSchema(
+            id = "123",
+            question= "What is the meaning of life?",
+            old_answer = "42",
+            new_answer = "The meaning of life is 42."   
+        )
+
+        response = conciseness.do("FAKE_OPENAI_API_KEY", event)
+
+        self.assertEqual(response.statusCode, 500)
+        self.assertIsInstance(response.body, conciseness.ErrorSchema)
+
 if __name__ == '__main__':
     unittest.main()

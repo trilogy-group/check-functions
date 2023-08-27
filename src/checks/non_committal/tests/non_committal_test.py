@@ -2,36 +2,44 @@ import unittest
 from unittest.mock import patch, Mock
 import sys
 import os
-import json
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import old_answer_non_committal
 
 class TestYourLambdaScript(unittest.TestCase):
-
-    @patch('old_answer_non_committal.get_secret')
     @patch('old_answer_non_committal.make_llm_call')
-    def test_non_committal_check(self, mock_make_llm_call, mock_get_secret):
-        mock_get_secret.return_value = {
-            "OPENAI_API_KEY": "mocked_api_key"
-        }
+    def test_non_committal_check(self, mock_make_llm_call):
+        mock_make_llm_call.return_value = '{"non_committal": true}'
         
-        mock_make_llm_call.return_value = '{"non_committal": "true"}'
+        event = old_answer_non_committal.LLMToolkitStdCheckInputSchema(
+            id = "123",
+            question= "What is the meaning of life?",
+            old_answer = "I don't know.",
+            new_answer = "The meaning of life is 42."   
+        )
+
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event)
+
+        self.assertEqual(response.statusCode, 200)
+        self.assertIsInstance(response.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema)
+        if isinstance(response.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema):
+            self.assertEqual(response.body.result, {"non_committal": True})
+
+    @patch('old_answer_non_committal.make_llm_call')
+    def test_non_json_output(self, mock_make_llm_call):
+        mock_make_llm_call.return_value = 'The answer is less non-committal.'
         
-        event = {
-            "id": "123",
-            "question": "What is the meaning of life?",
-            "old_answer": "42",
-            "new_answer": "The meaning of life is 42."
-        }
+        event = old_answer_non_committal.LLMToolkitStdCheckInputSchema(
+            id = "123",
+            question= "What is the meaning of life?",
+            old_answer = "42",
+            new_answer = "The meaning of life is 42."   
+        )
 
-        context = {}
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event)
 
-        response = old_answer_non_committal.lambda_handler(event, context)
-
-        self.assertEqual(response['statusCode'], 200)
-        self.assertTrue('result' in response['body'])
-        self.assertEqual(type(response['body']['result']), dict)
+        self.assertEqual(response.statusCode, 500)
+        self.assertIsInstance(response.body, old_answer_non_committal.ErrorSchema)
 
 if __name__ == '__main__':
     unittest.main()

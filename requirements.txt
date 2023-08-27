@@ -1,2 +1,0 @@
--r checks/conciseness/requirements.txt
--r checks/non_committal/requirements.txt

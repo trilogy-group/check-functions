@@ -9,6 +9,9 @@ import conciseness
 
 class TestYourLambdaScript(unittest.TestCase):
 
+    #TODO there is almost no value in this test as the only thing it is tesing is OPENAI and that too is mocked.
+    #It is fine to have one sanity test like this, but the real value is in testing the logic of YOUR code, and that
+    # means you need to test all the failure conditions because that is the main logic you have written.
     @patch('conciseness.get_secret')
     @patch('conciseness.make_llm_call')
     def test_conciseness_check(self, mock_make_llm_call, mock_get_secret):

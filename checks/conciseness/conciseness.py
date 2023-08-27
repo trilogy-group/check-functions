@@ -60,6 +60,8 @@ def lambda_handler(event: dict, context: dict) -> OutputSchema:
     return do(secrets["OPENAI_API_KEY"], input_data)
 
 def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSchema:
+    #TODO try to get these prompts from the same place as promptfoo. ie make sure at least one set of promptfoo tests is run on the final prompt, and that that same promt is imported here.
+    # this way there is a huge risk that we'll modify this promt and never update the tests, or vice versa.
     user_prompt, system_prompt = compare_answers_prompt(
             question=input_data.question,
             old_answer = input_data.old_answer,

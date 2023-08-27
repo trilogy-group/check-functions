@@ -23,6 +23,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Get the directory containing the script
+script_dir=$(dirname "$(realpath "$0")")
+bash $script_dir/createAllUtilsSymlink.sh
+
 if [[ -z $update_secrets ]]; then
     echo "Error: Include parameters for update_secrets for cloudformation template"
 fi

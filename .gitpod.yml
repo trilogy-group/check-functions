@@ -1,3 +1,4 @@
+---
 # List the start up tasks. You can start them in parallel in multiple terminals. See https://www.gitpod.io/docs/config-start-tasks/
 tasks:
   - name: Saml configure and login
@@ -56,3 +57,4 @@ vscode:
     - GitHub.copilot
     - ms-python.python
     - GitHub.copilot-labs
+    - ms-pyright.pyright

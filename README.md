@@ -10,10 +10,10 @@ It is recommended to use Devspaces for development with this template as it uses
 5. Your application will now be up and running. 
 
 ## Structure
-The checks are present in the `/checks/{check_name}.` folder. Some common utilities are present in the `/checks/{check_name}/utils` folder. Unit tests are present in the `/checks/{check_name}/tests` folder.
+The checks are present in the `/src/checks/{check_name}.` folder. Some common utilities are present in the `/src/checks/{check_name}/utils` folder. Unit tests are present in the `/src/checks/{check_name}/tests` folder.
 
 ## Prompt Testing
-The prompts can be tested using promptfoo. These instructions for running these tests can be found under `/checks/{check_name}/tests/promptfoo/README.md`
+The prompts can be tested using promptfoo. These instructions for running these tests can be found under `/src/checks/{check_name}/tests/promptfoo/README.md`
 
 ## Deploying
 To deploy the check functions,

@@ -62,7 +62,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: old_answer_non_committal.lambda_handler
-      CodeUri: checks/non_committal
+      CodeUri: src/checks/non_committal
       Description: Old Answer Non Committal Checker
       Architectures:
         - x86_64
@@ -80,7 +80,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
     Properties:
       Handler: new_answer_non_committal.lambda_handler
-      CodeUri: checks/non_committal
+      CodeUri: src/checks/non_committal
       Description: New Answer Non Committal Checker
       Architectures:
         - x86_64

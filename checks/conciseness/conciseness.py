@@ -97,7 +97,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSc
             reason=str(e),
         ))
 
-def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str, temperature: int = 0)->str:
+def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str)->str:
     openai.api_key = openai_api_key
     response = openai.ChatCompletion.create(
         model=openai_model,

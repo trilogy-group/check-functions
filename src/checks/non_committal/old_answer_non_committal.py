@@ -1,6 +1,6 @@
 import json
 import pathlib
-from typing import Dict, Union
+from typing import Dict, Union, Any
 
 import openai
 from openai.error import OpenAIError
@@ -23,7 +23,11 @@ class LLMToolkitStdCheckInputSchema(BaseModel):
 
 class LLMToolkitStdCheckOutputSchema(BaseModel):
     id: str
-    result: Dict[str, Union[str, int, float, bool]]
+    '''
+    result should ideally have a type of `Union[str, int, float, bool]`
+    But there is a weird bug where this converts the dictionary values to strings while loading them
+    '''
+    result: Dict[str, Any]
 
 class ErrorSchema(BaseModel):
     message: str
@@ -91,6 +95,11 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
         )).dict()
     
     try:
+        
+        print(check_result, check_dictionary, LLMToolkitStdCheckOutputSchema(
+            id = input_data.id,
+            result = check_dictionary
+        ))
         return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
             id = input_data.id,
             result = check_dictionary

@@ -44,7 +44,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: conciseness.lambda_handler
-      CodeUri: checks/conciseness
+      CodeUri: src/checks/conciseness
       Description: Conciseness Checker
       Architectures:
         - x86_64

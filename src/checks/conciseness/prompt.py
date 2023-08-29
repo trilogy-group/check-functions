@@ -1,9 +1,9 @@
-from typing import List
+from typing import Tuple
 from jinja2 import Template
 import json
 from typing import Optional
 
-def compare_answers_prompt(question: str, old_answer: str, new_answer: str, prompt_path: str):
+def compare_answers_prompt(question: str, old_answer: str, new_answer: str, prompt_path: str) ->Tuple[str, str]:
 
     with open(prompt_path, "r") as f:
         prompts_string = f.read()

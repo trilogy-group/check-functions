@@ -1,9 +1,9 @@
-from typing import List
+from typing import Tuple
 from jinja2 import Template
 import json
 from typing import Optional
 
-def detect_noncommittal_response(question: str, answer: str, prompt_path: str):
+def detect_noncommittal_response(question: str, answer: str, prompt_path: str) -> Tuple[str, str]:
 
     with open(prompt_path, "r") as f:
         prompts_string = f.read()

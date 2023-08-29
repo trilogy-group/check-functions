@@ -46,7 +46,9 @@ if [ -e "$target_location" ] || [ -L "$target_location" ]; then
 fi
 
 # Create symlink
-ln -s "$source_folder" "$target_location"
+cd $target_parent_directory
+relative_source_folder=$(realpath --relative-to $target_parent_directory $source_folder)
+ln -s "$relative_source_folder" "$(basename "$target_location")"
 
 if [ $? -eq 0 ]; then
     echo "Success"

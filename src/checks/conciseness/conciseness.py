@@ -63,9 +63,9 @@ def lambda_handler(event: dict, context: dict) -> dict:
         openai_api_key=secrets["OPENAI_API_KEY"], 
         input_data=input_data,
         prompt_path="prompt.json"
-    )
+    ).dict()
 
-def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->dict:
+def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->OutputSchema:
     user_prompt, system_prompt = compare_answers_prompt(
             question=input_data.question,
             old_answer = input_data.old_answer,
@@ -81,7 +81,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
             message="Internal Server Error",
             reason=str(e),
         )
-        return OutputSchema(statusCode=500, body=response).dict()
+        return OutputSchema(statusCode=500, body=response)
 
     try:
         check_dictionary = json.loads(check_result)
@@ -90,19 +90,19 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
         return OutputSchema(statusCode=500, body=ErrorSchema(
             message="Check result not valid json",
             reason=str(e),
-        )).dict()
+        ))
     
     try:
         return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
             id = input_data.id,
             result = check_dictionary
-        )).dict()
+        ))
     except ValidationError as e:
         logger.error(f"Failed while trying to set output to {check_dictionary=}")
         return OutputSchema(statusCode=500, body=ErrorSchema(
             message="Check result not valid schema",
             reason=str(e),
-        )).dict()
+        ))
 
 def make_llm_call(openai_api_key: str, openai_model: str, user_prompt: str, system_prompt: str)->str:
     openai.api_key = openai_api_key

@@ -46,6 +46,10 @@ jobs:
       #   run: |
       #     pip install -r setup/requirements.txt
       #     python setup/load_env.py "env/.env.${{ github.ref_name }}.enc"
+      - name: Create env file
+        run: |
+          touch .env
+          echo OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} > .env
 
       # Load .env file
       - name: Load .env file
@@ -60,7 +64,5 @@ jobs:
       - name: Package, Check/Create S3 Bucket, and Deploy
         run: |
           bash scripts/deploy.sh --stage ${{ steps.vars.outputs.stage }} --update_secrets true
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
         

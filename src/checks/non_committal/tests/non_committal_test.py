@@ -5,6 +5,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import old_answer_non_committal
+from old_answer_non_committal import OutputSchema
 
 class TestYourLambdaScript(unittest.TestCase):
     @patch('old_answer_non_committal.make_llm_call')
@@ -18,12 +19,13 @@ class TestYourLambdaScript(unittest.TestCase):
             new_answer = "The meaning of life is 42."   
         )
 
-        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event)
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        output = OutputSchema.parse_obj(response)
 
-        self.assertEqual(response.statusCode, 200)
-        self.assertIsInstance(response.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema)
-        if isinstance(response.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema):
-            self.assertEqual(response.body.result, {"non_committal": True})
+        self.assertEqual(output.statusCode, 200)
+        self.assertIsInstance(output.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema)
+        if isinstance(output.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema):
+            self.assertEqual(output.body.result, {"non_committal": True})
 
     @patch('old_answer_non_committal.make_llm_call')
     def test_non_json_output(self, mock_make_llm_call):
@@ -36,10 +38,12 @@ class TestYourLambdaScript(unittest.TestCase):
             new_answer = "The meaning of life is 42."   
         )
 
-        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event)
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        output = OutputSchema.parse_obj(response)
 
-        self.assertEqual(response.statusCode, 500)
-        self.assertIsInstance(response.body, old_answer_non_committal.ErrorSchema)
+
+        self.assertEqual(output.statusCode, 500)
+        self.assertIsInstance(output.body, old_answer_non_committal.ErrorSchema)
 
 if __name__ == '__main__':
     unittest.main()

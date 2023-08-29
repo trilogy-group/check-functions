@@ -36,9 +36,9 @@ if [[ -z $AWS_DEFAULT_REGION ]]; then
     export AWS_DEFAULT_REGION="us-east-1"
 fi
 
-SecretsName="yogesh-check-functions-process-bp-project-$stage-secrets"
-StackName="yogesh-check-functions-process-bp-project-$stage"
-BucketName="yogesh-check-functions-process-bp-project-$stage-bucket"
+SecretsName="sahil-check-functions-process-bp-project-$stage-secrets"
+StackName="sahil-check-functions-process-bp-project-$stage"
+BucketName="sahil-check-functions-process-bp-project-$stage-bucket"
 
 if ! aws s3api head-bucket --bucket $BucketName 2>/dev/null; then
           aws s3api create-bucket --bucket $BucketName

@@ -1,10 +1,11 @@
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import conciseness
+from conciseness import OutputSchema
 
 class TestYourLambdaScript(unittest.TestCase):
 
@@ -22,12 +23,12 @@ class TestYourLambdaScript(unittest.TestCase):
             new_answer = "The meaning of life is 42."   
         )
 
-        response = conciseness.do("FAKE_OPENAI_API_KEY", event)
-
-        self.assertEqual(response.statusCode, 200)
-        self.assertIsInstance(response.body, conciseness.LLMToolkitStdCheckOutputSchema)
-        if isinstance(response.body, conciseness.LLMToolkitStdCheckOutputSchema):
-            self.assertEqual(response.body.result, {"conciseness": "less"})
+        response = conciseness.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        output = OutputSchema.parse_obj(response)
+        self.assertEqual(output.statusCode, 200)
+        self.assertIsInstance(output.body, conciseness.LLMToolkitStdCheckOutputSchema)
+        if isinstance(output.body, conciseness.LLMToolkitStdCheckOutputSchema):
+            self.assertEqual(output.body.result, {"conciseness": "less"})
 
     @patch('conciseness.make_llm_call')
     def test_non_json_output(self, mock_make_llm_call):
@@ -40,10 +41,10 @@ class TestYourLambdaScript(unittest.TestCase):
             new_answer = "The meaning of life is 42."   
         )
 
-        response = conciseness.do("FAKE_OPENAI_API_KEY", event)
-
-        self.assertEqual(response.statusCode, 500)
-        self.assertIsInstance(response.body, conciseness.ErrorSchema)
+        response = conciseness.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        output = OutputSchema.parse_obj(response)
+        self.assertEqual(output.statusCode, 500)
+        self.assertIsInstance(output.body, conciseness.ErrorSchema)
 
 if __name__ == '__main__':
     unittest.main()

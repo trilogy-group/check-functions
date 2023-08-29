@@ -59,14 +59,18 @@ def lambda_handler(event: dict, context: dict) -> dict:
         )
         return OutputSchema(statusCode=500, body=response).dict()
     
-    return do(secrets["OPENAI_API_KEY"], input_data)
+    return do(
+        openai_api_key=secrets["OPENAI_API_KEY"], 
+        input_data=input_data,
+        prompt_path="prompt.json"
+    )
 
-def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->dict:
+def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->dict:
     user_prompt, system_prompt = compare_answers_prompt(
             question=input_data.question,
             old_answer = input_data.old_answer,
             new_answer=input_data.new_answer,
-            prompt_path=str(pathlib.Path(__file__).parent.resolve().joinpath("prompt.json"))
+            prompt_path=str(pathlib.Path(__file__).parent.resolve().joinpath(prompt_path))
         )
     try:
         openai_model: str = 'gpt-3.5-turbo'

@@ -6,7 +6,11 @@ from typing import Optional
 def detect_noncommittal_response(question: str, answer: str, prompt_path: str):
 
     with open(prompt_path, "r") as f:
-        prompts = json.loads(f.read())
+        prompts_string = f.read()
+        try:
+            prompts = json.loads(prompts_string)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Failed to parse {prompts_string}")
         system_prompt_template: Optional[Template] = None
         user_prompt_template: Optional[Template] = None
         for prompt in prompts:
@@ -14,6 +18,8 @@ def detect_noncommittal_response(question: str, answer: str, prompt_path: str):
                 system_prompt_template = Template(prompt.get('content'))
             elif prompt.get('role') == 'user':
                 user_prompt_template = Template(prompt.get('content'))
+            else:
+                raise ValueError(f"Received prompt with unknown role: {prompt}")
         if system_prompt_template is None or user_prompt_template is None:
             raise ValueError("Could not parse prompts.")
         return \

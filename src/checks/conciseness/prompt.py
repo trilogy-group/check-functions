@@ -1,11 +1,21 @@
 from typing import List
-def compare_answers_prompt(question: str, old_answer: str, new_answer: str, labels: List[str] = ["more", "less", "unchanged"]):
+from jinja2 import Template
+import json
+from typing import Optional
 
-    system_prompt = f"""You are an AI assistant that compares two different answers to the same question. 
-    You are to compare the second answer against the first on the following criterion: how concise the answer is. 
-    Classify the content in second answer as compared to the first answer, with one of the following labels: {', '.join(labels)}
-    Your answer should be a JSON object with conciseness as the key and the label as the value.
-    """
+def compare_answers_prompt(question: str, old_answer: str, new_answer: str, prompt_path: str):
 
-    user_prompt = f"Question: {question}\nFirst answer: {old_answer}\nSecond answer: {new_answer}\n. Make sure your response contains a single word"
-    return user_prompt, system_prompt
+    with open(prompt_path, "r") as f:
+        prompts = json.loads(f.read())
+        system_prompt_template: Optional[Template] = None
+        user_prompt_template: Optional[Template] = None
+        for prompt in prompts:
+            if prompt.get('role') == 'system':
+                system_prompt_template = Template(prompt.get('content'))
+            elif prompt.get('role') == 'user':
+                user_prompt_template = Template(prompt.get('content'))
+        if system_prompt_template is None or user_prompt_template is None:
+            raise ValueError("Could not parse prompts.")
+        return \
+            system_prompt_template.render(question=question, old_answer=old_answer, new_answer=new_answer),\
+            user_prompt_template.render(question=question, old_answer=old_answer, new_answer=new_answer)

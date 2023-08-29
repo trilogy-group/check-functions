@@ -7,6 +7,7 @@ from prompt import detect_noncommittal_response
 from utils.secret_manager import get_secret
 from utils.logger import get_logger
 from typing import Dict, Union
+import pathlib
 
 
 logger = get_logger(__name__)
@@ -62,7 +63,8 @@ def lambda_handler(event: dict, context: dict) -> OutputSchema:
 def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSchema:
     user_prompt, system_prompt = detect_noncommittal_response(
         question=input_data.question,
-        answer = input_data.old_answer
+        answer = input_data.old_answer,
+        prompt_path=str(pathlib.Path(__file__).parent.resolve().joinpath("prompt.json"))
     )
     try:
         openai_model: str = 'gpt-3.5-turbo'

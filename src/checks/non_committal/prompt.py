@@ -1,7 +1,7 @@
-from typing import Tuple
-from jinja2 import Template
+from typing import Tuple, Optional
 import json
-from typing import Optional
+
+from jinja2 import Template
 
 def detect_noncommittal_response(question: str, answer: str, prompt_path: str) -> Tuple[str, str]:
 

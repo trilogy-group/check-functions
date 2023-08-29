@@ -1,7 +1,7 @@
-from typing import Tuple
-from jinja2 import Template
+from typing import Tuple, Optional
 import json
-from typing import Optional
+
+from jinja2 import Template
 
 def compare_answers_prompt(question: str, old_answer: str, new_answer: str, prompt_path: str) ->Tuple[str, str]:
 

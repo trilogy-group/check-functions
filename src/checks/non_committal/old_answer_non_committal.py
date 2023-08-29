@@ -32,7 +32,7 @@ class ErrorSchema(BaseModel):
 class OutputSchema(BaseModel):
     statusCode: int
     body: Union[LLMToolkitStdCheckOutputSchema, ErrorSchema]
-def lambda_handler(event: dict, context: dict) -> OutputSchema:
+def lambda_handler(event: dict, context: dict) -> dict:
     '''
     This function assesses whether or not the old answer is non committal. It conforms to the LLM Toolkit Standard Check API defined here: https://github.com/trilogy-group/llm_toolkit_api/blob/3fe8805e210554b616c47a60216addb01ea14cff/runtime/chalicelib/schema/evaluation.py#L138
     TODO: Replace the above link to a readme once merged
@@ -46,7 +46,7 @@ def lambda_handler(event: dict, context: dict) -> OutputSchema:
             message="Bad Request Body",
             reason=str(ve),
         )
-        return OutputSchema(statusCode=400, body=response)
+        return OutputSchema(statusCode=400, body=response).dict()
 
     try:
         secrets = get_secret()
@@ -56,11 +56,11 @@ def lambda_handler(event: dict, context: dict) -> OutputSchema:
             message="Internal Server Error",
             reason=str(e),
         )
-        return OutputSchema(statusCode=500, body=response)
+        return OutputSchema(statusCode=500, body=response).dict()
     
     return do(secrets["OPENAI_API_KEY"], input_data)
 
-def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSchema:
+def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->dict:
     user_prompt, system_prompt = detect_noncommittal_response(
         question=input_data.question,
         answer = input_data.old_answer,
@@ -75,7 +75,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSc
             message="Internal Server Error",
             reason=str(e),
         )
-        return OutputSchema(statusCode=500, body=response)
+        return OutputSchema(statusCode=500, body=response).dict()
 
     try:
         check_dictionary = json.loads(check_result)
@@ -84,19 +84,19 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSc
         return OutputSchema(statusCode=500, body=ErrorSchema(
             message="Check result not valid json",
             reason=str(e),
-        ))
+        )).dict()
     
     try:
         return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
             id = input_data.id,
             result = check_dictionary
-        ))
+        )).dict()
     except ValidationError as e:
         logger.error(f"Failed while trying to set output to {check_dictionary=}")
         return OutputSchema(statusCode=500, body=ErrorSchema(
             message="Check result not valid schema",
             reason=str(e),
-        ))
+        )).dict()
 
 
         

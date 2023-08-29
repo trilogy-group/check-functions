@@ -1,17 +1,17 @@
-from pydantic import ValidationError, BaseModel
 import json
+import pathlib
+from typing import Dict, Union
+
 import openai
-from openai.error import Timeout, APIError, APIConnectionError, InvalidRequestError, AuthenticationError, PermissionError, RateLimitError
+from openai.error import OpenAIError
+from pydantic import BaseModel, ValidationError
 
 from prompt import detect_noncommittal_response
-from utils.secret_manager import get_secret
 from utils.logger import get_logger
-from typing import Dict, Union
-import pathlib
+from utils.secret_manager import get_secret
 
 
 logger = get_logger(__name__)
-openai_errors = ( Timeout, APIError, APIConnectionError, InvalidRequestError, AuthenticationError, PermissionError, RateLimitError )
 
 # TODO: we should move these into a different repo, probably llm-toolkit-api, and import them here
 class LLMToolkitStdCheckInputSchema(BaseModel):
@@ -69,7 +69,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema)->OutputSc
     try:
         openai_model: str = 'gpt-3.5-turbo'
         check_result = make_llm_call(openai_api_key, openai_model, user_prompt=user_prompt, system_prompt=system_prompt)
-    except openai_errors as e:
+    except OpenAIError as e:
         logger.error(f"Failed to make call to openai: {e}")
         response = ErrorSchema(
             message="Internal Server Error",

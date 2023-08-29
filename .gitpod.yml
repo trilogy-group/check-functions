@@ -1,3 +1,4 @@
+---
 # List the start up tasks. You can start them in parallel in multiple terminals. See https://www.gitpod.io/docs/config-start-tasks/
 tasks:
   - name: Saml configure and login
@@ -40,9 +41,9 @@ tasks:
   - name: Setup Project
     init: |
       gp sync-await sam
-      pip install -r setup/requirements.txt
-      python setup/git_hooks.py
-      python setup/dev.py
+      # pip install -r setup/requirements.txt
+      # python setup/git_hooks.py
+      # python setup/dev.py
       bash scripts/init.sh
   - name: Install Promptfoo
     init: |
@@ -50,3 +51,10 @@ tasks:
       nvm use v18.16.0
       npm install -g npm
       npm install -g promptfoo
+vscode:
+  extensions:
+    - amazonwebservices.aws-toolkit-vscode
+    - GitHub.copilot
+    - ms-python.python
+    - GitHub.copilot-labs
+    - ms-pyright.pyright

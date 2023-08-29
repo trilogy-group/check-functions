@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-SECRET_NAME="sahil-test-4-process-bp-project-secrets"
+if [[ "$1" != "dev" && "$1" != "prod" ]]; then
+  echo "Invalid argument: $1. Please use either 'dev' or 'prod'."
+  exit 1
+fi
+
+SECRET_NAME="sahil-check-functions-process-bp-project-$1-secrets"
 ENV_FILE=".env"
 
 # Check if the .env file exists

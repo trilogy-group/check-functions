@@ -73,14 +73,16 @@ def lambda_handler(event: dict, context: dict) -> dict:
     return do(
         openai_api_key=secrets["OPENAI_API_KEY"], 
         input_data=input_data,
-        prompt_path="prompt.json"
+        prompt_path="prompt.json",
+        key="new_answer_non_committal"
     ).dict()
 
-def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->OutputSchema:
+def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str, key: str)->OutputSchema:
     user_prompt, system_prompt = detect_noncommittal_response(
         question=input_data.new_qa_pair.question,
         answer = input_data.new_qa_pair.answer,
-        prompt_path = str(pathlib.Path(__file__).parent.resolve().joinpath(prompt_path))
+        prompt_path = str(pathlib.Path(__file__).parent.resolve().joinpath(prompt_path)),
+        key=key
     )
     try:
         openai_model: str = 'gpt-3.5-turbo'

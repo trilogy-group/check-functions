@@ -94,6 +94,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
 
     try:
         check_dictionary = json.loads(check_result)
+        logger.info(f"Computed checks {check_dictionary=}")
     except json.decoder.JSONDecodeError as e:
         logger.error(f"Failed while trying to parse response {check_result}: {e}")
         return OutputSchema(statusCode=500, body=ErrorSchema(

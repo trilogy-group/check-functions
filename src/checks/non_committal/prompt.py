@@ -3,7 +3,7 @@ import json
 
 from jinja2 import Template
 
-def detect_noncommittal_response(question: str, answer: str, prompt_path: str) -> Tuple[str, str]:
+def detect_noncommittal_response(question: str, answer: str, prompt_path: str, key: str) -> Tuple[str, str]:
 
     with open(prompt_path, "r") as f:
         prompts_string = f.read()
@@ -23,5 +23,5 @@ def detect_noncommittal_response(question: str, answer: str, prompt_path: str) -
         if system_prompt_template is None or user_prompt_template is None:
             raise ValueError("Could not parse prompts.")
         return \
-            system_prompt_template.render(question=question, answer=answer),\
-            user_prompt_template.render(question=question, answer=answer)
+            system_prompt_template.render(question=question, answer=answer, key=key),\
+            user_prompt_template.render(question=question, answer=answer, key=key)

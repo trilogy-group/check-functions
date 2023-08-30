@@ -17,7 +17,7 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
 
 # TODO: Use parameter store instead
 Resources:
-  SecretReaderRole:
+  DefaultRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -37,8 +37,14 @@ Resources:
                 Effect: Allow
                 Resource:
                   - "*"
+              - Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Effect: Allow
+                Resource: arn:aws:logs:*:*:*
             Version: "2012-10-17"
-          PolicyName: SecretReaderRolePolicy
+          PolicyName: DefaultRolePolicy
 
   ConcisenessCheckFunction:
     Type: AWS::Serverless::Function
@@ -55,7 +61,7 @@ Resources:
           SECRET_NAME: !Ref SecretsName
       Role:
         Fn::GetAtt:
-        - SecretReaderRole
+        - DefaultRole
         - Arn
   
   OldAnswerNonCommittalCheckFunction:
@@ -73,7 +79,7 @@ Resources:
           SECRET_NAME: !Ref SecretsName
       Role:
         Fn::GetAtt:
-        - SecretReaderRole
+        - DefaultRole
         - Arn
   
   NewAnswerNonCommittalCheckFunction:
@@ -91,7 +97,7 @@ Resources:
           SECRET_NAME: !Ref SecretsName
       Role:
         Fn::GetAtt:
-        - SecretReaderRole
+        - DefaultRole
         - Arn
 
 Outputs:

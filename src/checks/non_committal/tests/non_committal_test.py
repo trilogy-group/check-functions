@@ -10,7 +10,7 @@ from old_answer_non_committal import OutputSchema, QAPair
 class TestYourLambdaScript(unittest.TestCase):
     @patch('old_answer_non_committal.make_llm_call')
     def test_non_committal_check(self, mock_make_llm_call):
-        mock_make_llm_call.return_value = '{"non_committal": true}'
+        mock_make_llm_call.return_value = '{"old_answer_non_committal": true}'
 
         
         old_qa_pair = QAPair(
@@ -33,13 +33,13 @@ class TestYourLambdaScript(unittest.TestCase):
             new_qa_pair=new_qa_pair
         )
 
-        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json", "old_answer_non_committal")
         output = OutputSchema.parse_obj(response)
 
         self.assertEqual(output.statusCode, 200)
         self.assertIsInstance(output.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema)
         if isinstance(output.body, old_answer_non_committal.LLMToolkitStdCheckOutputSchema):
-            self.assertEqual(output.body.result, {"non_committal": True})
+            self.assertEqual(output.body.result, {"old_answer_non_committal": True})
 
     @patch('old_answer_non_committal.make_llm_call')
     def test_non_json_output(self, mock_make_llm_call):
@@ -66,7 +66,7 @@ class TestYourLambdaScript(unittest.TestCase):
             new_qa_pair=new_qa_pair
         )
         
-        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
+        response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json", "old_answer_non_committal")
         output = OutputSchema.parse_obj(response)
 
 

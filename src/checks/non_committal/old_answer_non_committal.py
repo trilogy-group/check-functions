@@ -1,6 +1,6 @@
 import json
 import pathlib
-from typing import Dict, Union, Any
+from typing import Dict, Union, Optional, List, Any
 
 import openai
 from openai.error import OpenAIError
@@ -13,16 +13,24 @@ from utils.secret_manager import get_secret
 
 logger = get_logger(__name__)
 
-# TODO: we should move these into a different repo, probably llm-toolkit-api, and import them here
-class LLMToolkitStdCheckInputSchema(BaseModel):
+class Feedback(BaseModel):
+    rating: int
+    alternative_answer: Optional[List[str]] = None
+    comment: Optional[str] = None
+
+class QAPair(BaseModel):
     id: str
     question: str
-    new_answer: str
-    old_answer: str
+    answer: str
+    feedback: Optional[Feedback] = None
+    version: str
+    sources: List[str] = []
 
+class LLMToolkitStdCheckInputSchema(BaseModel):
+    old_qa_pair: QAPair
+    new_qa_pair: QAPair
 
 class LLMToolkitStdCheckOutputSchema(BaseModel):
-    id: str
     '''
     result should ideally have a type of `Union[str, int, float, bool]`
     But there is a weird bug where this converts the dictionary values to strings while loading them
@@ -70,8 +78,8 @@ def lambda_handler(event: dict, context: dict) -> dict:
 
 def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->OutputSchema:
     user_prompt, system_prompt = detect_noncommittal_response(
-        question=input_data.question,
-        answer = input_data.old_answer,
+        question=input_data.old_qa_pair.question,
+        answer = input_data.old_qa_pair.answer,
         prompt_path=str(pathlib.Path(__file__).parent.resolve().joinpath(prompt_path))
     )
     try:
@@ -95,13 +103,7 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
         ))
     
     try:
-        
-        print(check_result, check_dictionary, LLMToolkitStdCheckOutputSchema(
-            id = input_data.id,
-            result = check_dictionary
-        ))
         return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
-            id = input_data.id,
             result = check_dictionary
         ))
     except ValidationError as e:

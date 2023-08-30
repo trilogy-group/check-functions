@@ -5,7 +5,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import conciseness
-from conciseness import OutputSchema
+from conciseness import OutputSchema, QAPair
 
 class TestYourLambdaScript(unittest.TestCase):
 
@@ -15,12 +15,24 @@ class TestYourLambdaScript(unittest.TestCase):
     @patch('conciseness.make_llm_call')
     def test_conciseness_check(self, mock_make_llm_call):
         mock_make_llm_call.return_value = '{"conciseness": "less"}'
+        old_qa_pair = QAPair(
+            id="123",
+            question="What is the meaning of life?",
+            answer="42",
+            version="v0.9",
+            sources=[]
+        )
+        new_qa_pair = QAPair(
+            id="456",
+            question="What is the meaning of life?",
+            answer="The meaning of life is 42.",
+            version="v1.0",
+            sources=[]
+        )
         
         event = conciseness.LLMToolkitStdCheckInputSchema(
-            id = "123",
-            question= "What is the meaning of life?",
-            old_answer = "42",
-            new_answer = "The meaning of life is 42."   
+            old_qa_pair=old_qa_pair,
+            new_qa_pair=new_qa_pair
         )
 
         response = conciseness.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
@@ -34,11 +46,25 @@ class TestYourLambdaScript(unittest.TestCase):
     def test_non_json_output(self, mock_make_llm_call):
         mock_make_llm_call.return_value = 'The answer is less concise.'
         
+        
+        old_qa_pair = QAPair(
+            id="123",
+            question="What is the meaning of life?",
+            answer="42",
+            version="v0.9",
+            sources=[]
+        )
+        new_qa_pair = QAPair(
+            id="456",
+            question="What is the meaning of life?",
+            answer="The meaning of life is 42.",
+            version="v1.0",
+            sources=[]
+        )
+        
         event = conciseness.LLMToolkitStdCheckInputSchema(
-            id = "123",
-            question= "What is the meaning of life?",
-            old_answer = "42",
-            new_answer = "The meaning of life is 42."   
+            old_qa_pair=old_qa_pair,
+            new_qa_pair=new_qa_pair
         )
 
         response = conciseness.do("FAKE_OPENAI_API_KEY", event, "prompt.json")

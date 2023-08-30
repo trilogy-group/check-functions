@@ -1,6 +1,6 @@
 import json
 import pathlib
-from typing import Dict, Union
+from typing import Dict, Union, Optional, List, Any
 
 import openai
 from openai.error import OpenAIError
@@ -13,16 +13,25 @@ from utils.secret_manager import get_secret
 logger = get_logger(__name__)
 
 # TODO: we should move these into a different repo, probably llm-toolkit-api, and import them here
-class LLMToolkitStdCheckInputSchema(BaseModel):
+class Feedback(BaseModel):
+    rating: int
+    alternative_answer: Optional[List[str]] = None
+    comment: Optional[str] = None
+
+class QAPair(BaseModel):
     id: str
     question: str
-    new_answer: str
-    old_answer: str
+    answer: str
+    feedback: Optional[Feedback] = None
+    version: str
+    sources: List[str] = []
 
+class LLMToolkitStdCheckInputSchema(BaseModel):
+    old_qa_pair: QAPair
+    new_qa_pair: QAPair
 
 class LLMToolkitStdCheckOutputSchema(BaseModel):
-    id: str
-    result: Dict[str, Union[str, int, float, bool]]
+    result: Dict[str, Any]
 
 class ErrorSchema(BaseModel):
     message: str
@@ -67,9 +76,9 @@ def lambda_handler(event: dict, context: dict) -> dict:
 
 def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_path: str)->OutputSchema:
     user_prompt, system_prompt = compare_answers_prompt(
-            question=input_data.question,
-            old_answer = input_data.old_answer,
-            new_answer=input_data.new_answer,
+            question=input_data.old_qa_pair.question,
+            old_answer = input_data.old_qa_pair.answer,
+            new_answer=input_data.new_qa_pair.answer,
             prompt_path=str(pathlib.Path(__file__).parent.resolve().joinpath(prompt_path))
         )
     try:
@@ -94,7 +103,6 @@ def do(openai_api_key: str, input_data: LLMToolkitStdCheckInputSchema, prompt_pa
     
     try:
         return OutputSchema(statusCode=200, body=LLMToolkitStdCheckOutputSchema(
-            id = input_data.id,
             result = check_dictionary
         ))
     except ValidationError as e:

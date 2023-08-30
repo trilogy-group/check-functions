@@ -5,18 +5,32 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import old_answer_non_committal
-from old_answer_non_committal import OutputSchema
+from old_answer_non_committal import OutputSchema, QAPair
 
 class TestYourLambdaScript(unittest.TestCase):
     @patch('old_answer_non_committal.make_llm_call')
     def test_non_committal_check(self, mock_make_llm_call):
         mock_make_llm_call.return_value = '{"non_committal": true}'
+
+        
+        old_qa_pair = QAPair(
+            id="123",
+            question="What is the meaning of life?",
+            answer="I don't know",
+            version="v0.9",
+            sources=[]
+        )
+        new_qa_pair = QAPair(
+            id="456",
+            question="What is the meaning of life?",
+            answer="The meaning of life is 42.",
+            version="v1.0",
+            sources=[]
+        )
         
         event = old_answer_non_committal.LLMToolkitStdCheckInputSchema(
-            id = "123",
-            question= "What is the meaning of life?",
-            old_answer = "I don't know.",
-            new_answer = "The meaning of life is 42."   
+            old_qa_pair=old_qa_pair,
+            new_qa_pair=new_qa_pair
         )
 
         response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
@@ -30,14 +44,28 @@ class TestYourLambdaScript(unittest.TestCase):
     @patch('old_answer_non_committal.make_llm_call')
     def test_non_json_output(self, mock_make_llm_call):
         mock_make_llm_call.return_value = 'The answer is less non-committal.'
+
+        
+        old_qa_pair = QAPair(
+            id="123",
+            question="What is the meaning of life?",
+            answer="42",
+            version="v0.9",
+            sources=[]
+        )
+        new_qa_pair = QAPair(
+            id="456",
+            question="What is the meaning of life?",
+            answer="The meaning of life is 42.",
+            version="v1.0",
+            sources=[]
+        )
         
         event = old_answer_non_committal.LLMToolkitStdCheckInputSchema(
-            id = "123",
-            question= "What is the meaning of life?",
-            old_answer = "42",
-            new_answer = "The meaning of life is 42."   
+            old_qa_pair=old_qa_pair,
+            new_qa_pair=new_qa_pair
         )
-
+        
         response = old_answer_non_committal.do("FAKE_OPENAI_API_KEY", event, "prompt.json")
         output = OutputSchema.parse_obj(response)
 
